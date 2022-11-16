@@ -1,0 +1,109 @@
+import logo from "./logo.svg";
+import { useState } from "react";
+import {
+  Button,
+  Navbar,
+  Container,
+  Nav,
+  Row,
+  Col,
+  NavLink,
+} from "react-bootstrap";
+import "./App.css";
+import "bootstrap/dist/css/bootstrap.min.css";
+import data from "./data.js";
+import { Card, About, Event } from "./components/components.js";
+import Detail from "./components/detail.js";
+import { Routes, Route, Link, useNavigate, Outlet } from "react-router-dom";
+import axios from "axios";
+function App() {
+  let [shoes, shoesch] = useState(data);
+  let navigate = useNavigate();
+  return (
+    <div className="App">
+      <Navbar bg="dark" variant="dark">
+        <Container>
+          <Navbar.Brand href="#home">shop of jy</Navbar.Brand>
+          <Nav className="me-auto">
+            <Nav.Link
+              onClick={() => {
+                navigate("/");
+              }}
+            >
+              Home
+            </Nav.Link>
+            <Nav.Link
+              onClick={() => {
+                navigate("/detail");
+              }}
+            >
+              Detail
+            </Nav.Link>
+          </Nav>
+        </Container>
+      </Navbar>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              <div
+                className="main-bg"
+                style={{
+                  backgroundImage: `url(${
+                    process.env.PUBLIC_URL + "/img/bg.jpg"
+                  })`,
+                }}
+              ></div>
+              <div className="container">
+                <div className="row">
+                  {shoes.map(function (a, i) {
+                    return <Card shoes={shoes[i]} i ={i} key={i} />;
+                  })}
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  let copy = [...shoes];
+                  copy.sort((a, b) =>
+                    a.title.toLowerCase() < b.title.toLowerCase() ? -1 : 1
+                  );
+                  shoesch(copy); //변경함수에 변경한 독립적카피본 copy를 넣음
+                }}
+              >
+                가나다순정렬
+              </button>
+              <button
+                onClick={() => {
+                  axios
+                    .get("https://codingapple1.github.io/shop/data2.json")
+                    .then((result) => {
+                      let copy = [...shoes];
+                      let a = copy.concat(result.data);
+                      shoesch(a);
+                      console.log(result.data);
+                    });
+                }}
+              >
+                버튼
+              </button>
+            </>
+          }
+        />
+        <Route path="/detail/:id" element={<Detail shoes={shoes} />} />
+        <Route path="/about" element={<About />}>
+          <Route path="member" element={<div>멤버임</div>} />
+          <Route path="location" element={<div>위치정보임</div>} />
+        </Route>
+        <Route path="/event" element={<Event />}>
+          <Route path="one" element={<div>첫주문시 양배추서비스</div>} />
+          <Route path="two" element={<div>생일기념 쿠폰받기</div>} />
+        </Route>
+
+        <Route path="*" element={<>없는페이지임</>} />
+      </Routes>
+    </div>
+  );
+}
+
+export default App;
